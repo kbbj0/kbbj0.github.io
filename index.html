@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成都亲子游 - 欢乐之旅</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #2d3748;
+            overflow-x: hidden;
+        }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px 0 rgba(31, 38, 135, 0.2);
+        }
+
+        .highlight-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .highlight-text::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: rgba(99, 102, 241, 0.2);
+            z-index: -1;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        .shadow-glow {
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.02);
+        }
+
+        .data-pill {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4f46e5;
+        }
+
+        .timeline-line {
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            transform-origin: top;
+            transform: scaleY(0);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .mobile-menu.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu a:hover, .mobile-menu a:focus {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+        }
+
+        .audio-player {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .spot-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .spot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px 0 rgba(31, 38, 135, 0.2);
+        }
+
+        .spot-image {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .schedule-day {
+            border-left: 4px solid #4f46e5;
+            padding-left: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .schedule-day::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航条 -->
+    <nav class="glassmorphism sticky top-0 z-50 p-4 mb-8" id="mainNav">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+                <i class="fas fa-paw mr-2"></i>成都亲子游
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#overview" class="text-gray-600 hover:text-indigo-600 transition-colors">景点介绍</a>
+                <a href="#schedule" class="text-gray-600 hover:text-indigo-600 transition-colors">行程安排</a>
+                <a href="#podcast" class="text-gray-600 hover:text-indigo-600 transition-colors">播客</a>
+            </div>
+            <button class="md:hidden text-gray-600 focus:outline-none" id="mobileMenuButton" aria-label="导航菜单">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- 移动端导航菜单 -->
+            <div class="mobile-menu md:hidden" id="mobileMenu">
+                <a href="#overview" class="text-gray-600 hover:text-indigo-600 transition-colors flex items-center">
+                    <i class="fas fa-map-marked-alt mr-3 text-indigo-500"></i>景点介绍
+                </a>
+                <a href="#schedule" class="text-gray-600 hover:text-indigo-600 transition-colors flex items-center">
+                    <i class="fas fa-calendar-alt mr-3 text-indigo-500"></i>行程安排
+                </a>
+                <a href="#podcast" class="text-gray-600 hover:text-indigo-600 transition-colors flex items-center">
+                    <i class="fas fa-podcast mr-3 text-indigo-500"></i>播客
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 头部横幅 -->
+    <header class="container mx-auto py-16 px-4 md:px-8 relative">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">
+                成都亲子欢乐之旅
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-8">探索熊猫故乡，体验蜀地文化</p>
+            <img src="https://p3-search.byteimg.com/obj/labis/845661d331d582ecbd9bb3e48d16eef4" alt="成都大熊猫" class="rounded-xl shadow-lg mx-auto w-full max-w-2xl">
+        </div>
+    </header>
+
+    <!-- 景点介绍部分 -->
+    <section id="overview" class="container mx-auto py-12 px-4 md:px-8">
+        <div class="glassmorphism p-8 mb-16">
+            <h2 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                成都亲子景点推荐
+            </h2>
+            
+            <!-- 成都大熊猫繁育研究基地 -->
+            <div class="spot-card glassmorphism p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="https://p3-search.byteimg.com/obj/labis/845661d331d582ecbd9bb3e48d16eef4" alt="成都大熊猫繁育研究基地" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">成都大熊猫繁育研究基地</h3>
+                        <p class="text-gray-600 mb-4">这里就像是大熊猫们的快乐家园，一只只圆滚滚的大熊猫就像毛茸茸的大团子，超级可爱！你可以近距离看到它们吃竹子、睡觉、玩耍的样子。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人票55元</div>
+                            <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁6号线西华大道站</div>
+                            <div class="data-pill"><i class="fas fa-clock mr-1"></i> 7:30-18:00</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 金沙遗址博物馆 -->
+            <div class="spot-card glassmorphism p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="http://pic5.40017.cn/03/000/43/79/rB5oQFzRSbCACd1wAAIeK0xyA4w466.jpg" alt="金沙遗址博物馆" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">金沙遗址博物馆</h3>
+                        <p class="text-gray-600 mb-4">这个地方可太神奇啦，就像是一扇通往古蜀文明的神秘大门。博物馆里有好多珍贵的文物，比如神秘的金面具和精美的玉器，都有着上千年的历史。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 门票70元</div>
+                            <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁换乘公交</div>
+                            <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩3-4小时</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 成都欢乐谷 -->
+            <div class="spot-card glassmorphism p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="https://p3-search.byteimg.com/obj/labis/cd3949f51add2f8d6bd29c56a2fe13f4" alt="成都欢乐谷" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">成都欢乐谷</h3>
+                        <p class="text-gray-600 mb-4">这里有阳光港区、欢乐时光区、加勒比旋风区等九个主题区，里面有好多好玩的游乐设施，比如摩托过山车、跳楼机，也有适合小朋友玩的旋转木马。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 全价票230元</div>
+                            <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁6号线西华大道站</div>
+                            <div class="data-pill"><i class="fas fa-clock mr-1"></i> 9:00-22:00</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 成都极地海洋公园 -->
+            <div class="spot-card glassmorphism p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="https://p3-sdbk2-media.byteimg.com/tos-cn-i-xv4ileqgde/cce6ce0219ed42e5a3247b4da0e60d2d~tplv-xv4ileqgde-image.image" alt="成都极地海洋公园" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">成都极地海洋公园</h3>
+                        <p class="text-gray-600 mb-4">这里就像一个神秘的海底世界，有企鹅馆、北极熊馆、鲸豚馆等。你可以看到聪明的海豚和白鲸表演，它们就像会跳舞的小精灵，一会儿跃出水面，一会儿做出各种可爱的动作。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人票260元</div>
+                            <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁1号线海昌路站</div>
+                            <div class="data-pill"><i class="fas fa-clock mr-1"></i> 9:30-17:00</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 成都融创乐园 -->
+            <div class="spot-card glassmorphism p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="https://p3-search.byteimg.com/obj/labis/e7cd2f8715ebd722570145b07d45029e" alt="成都融创乐园" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">成都融创乐园</h3>
+                        <p class="text-gray-600 mb-4">它是以蜀文化为主题的乐园，就像一个充满历史韵味的魔法城堡。这里有天府耍都、蜀汉风云、藏羌秘境等六大主题区，每个主题区都有自己独特的魅力。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人欢乐套票198元</div>
+                            <div class="data-pill"><i class="fas fa-bus mr-1"></i> 茶店子班车至都江堰</div>
+                            <div class="data-pill"><i class="fas fa-clock mr-1"></i> 10:00-21:00</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 都江堰熊猫谷和都江堰中华大熊猫苑 -->
+            <div class="spot-card glassmorphism p-6">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="https://p3-search.byteimg.com/obj/labis/06dc24c270ef40f96c8b574a38ad0f7d" alt="都江堰熊猫谷" class="spot-image rounded-lg mb-4">
+                        <img src="https://p3-search.byteimg.com/obj/labis/1498dcfcc1cc624cee8dcf3a752a0372" alt="都江堰中华大熊猫苑" class="spot-image rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-600">都江堰熊猫谷和都江堰中华大熊猫苑</h3>
+                        <p class="text-gray-600 mb-4">都江堰熊猫谷就像一个大自然的宝藏之地，你可以看到半原生态野放过渡实验区的大熊猫。都江堰中华大熊猫苑也很棒，你可以近距离观察大熊猫的日常生活，感受它们带来的温馨与愉悦。</p>
+                        <div class="flex flex-wrap mb-4">
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 熊猫谷全票55元</div>
+                            <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 大熊猫苑成人票53元</div>
+                            <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁2号线犀浦站换乘</div>
+                        </div>
+                        <a href="#schedule" class="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">查看行程安排 <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 行程安排部分 -->
+    <section id="schedule" class="container mx-auto py-12 px-4 md:px-8">
+        <div class="glassmorphism p-8 mb-16">
+            <h2 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                15天成都亲子游行程安排
+            </h2>
+            
+            <!-- 第1-2天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第1-2天：适应成都，感受熊猫魅力</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-4">
+                    <h4 class="text-xl font-semibold mb-2">第一天上午：抵达成都，前往外婆家休息</h4>
+                    <p class="text-gray-600">下飞机后，可以选择乘坐机场大巴、地铁或出租车前往七号线三瓦窑站附近的外婆家。稍作休息，缓解旅途疲劳。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="text-xl font-semibold mb-2">第一天下午 - 第二天：成都大熊猫繁育研究基地</h4>
+                    <p class="text-gray-600 mb-4">成都大熊猫繁育研究基地是世界著名的大熊猫科研繁育基地，在这里可以近距离观赏可爱的大熊猫，了解大熊猫的生活习性和繁育过程。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人票55元/人</div>
+                        <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁6号线西华大道站</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩4-5小时</div>
+                    </div>
+                    <img src="https://p3-search.byteimg.com/obj/labis/845661d331d582ecbd9bb3e48d16eef4" alt="成都大熊猫繁育研究基地" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第3-4天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第3-4天：探秘古蜀文明 - 金沙遗址博物馆</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 mb-4">金沙遗址博物馆是在古蜀文明重要考古发现——金沙遗址原址上建立的一座保护、研究、展示金沙遗址及古蜀文明的考古博物馆。馆藏文物种类丰富、体系完整。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 门票70元</div>
+                        <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁换乘公交</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩3-4小时</div>
+                    </div>
+                    <img src="http://pic5.40017.cn/03/000/43/79/rB5oQFzRSbCACd1wAAIeK0xyA4w466.jpg" alt="金沙遗址博物馆" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第5-6天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第5-6天：欢乐游乐园时光 - 成都欢乐谷</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 mb-4">成都欢乐谷由阳光港区、欢乐时光区、加勒比旋风区、巴蜀迷情区、飞行岛区、魔幻城堡区、飞跃地中海区、欢乐光年区及丝路传奇区九个主题区组成，汇集了国内国际游乐设施。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 全价票230元</div>
+                        <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁6号线西华大道站</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩1-2天</div>
+                    </div>
+                    <img src="https://p3-search.byteimg.com/obj/labis/cd3949f51add2f8d6bd29c56a2fe13f4" alt="成都欢乐谷" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第7-8天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第7-8天：感受海洋世界的奇妙 - 成都极地海洋公园</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 mb-4">成都极地海洋公园有企鹅馆、北极熊馆、鲸豚馆、鲨鱼馆、海兽湾、海豹馆、海象馆、海龟馆等动物场馆，还可以观看海豚梦想秀、白鲸之恋、欢乐剧场、鲨鱼表演等精彩表演。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人票260元</div>
+                        <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁1号线海昌路站</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩3-4小时</div>
+                    </div>
+                    <img src="https://p3-sdbk2-media.byteimg.com/tos-cn-i-xv4ileqgde/cce6ce0219ed42e5a3247b4da0e60d2d~tplv-xv4ileqgde-image.image" alt="成都极地海洋公园" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第9-10天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第9-10天：体验蜀文化主题乐园 - 成都融创乐园</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 mb-4">以蜀文化为主题，设计了天府耍都、蜀汉风云、藏羌秘境、星际传奇、奇遇花园、萌宠小镇六大主题区，共有天路历险、飞行影院、星际俱乐部等25台游乐设备和精彩演艺。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人欢乐套票198元</div>
+                        <div class="data-pill"><i class="fas fa-bus mr-1"></i> 茶店子班车至都江堰</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩2天</div>
+                    </div>
+                    <img src="https://p3-search.byteimg.com/obj/labis/e7cd2f8715ebd722570145b07d45029e" alt="成都融创乐园" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第11-12天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第11-12天：探寻都江堰的历史与自然之美</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-4">
+                    <h4 class="text-xl font-semibold mb-2">都江堰熊猫谷</h4>
+                    <p class="text-gray-600 mb-4">可以观赏半原生态野放过渡实验区的大熊猫，还有小熊猫生态放养区（需预约进入，一天只能进去一次）。在游玩过程中，小朋友可以学习到大熊猫和小熊猫的相关知识。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 全票55元/张</div>
+                        <div class="data-pill"><i class="fas fa-subway mr-1"></i> 地铁2号线犀浦站换乘</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩3-4小时</div>
+                    </div>
+                    <img src="https://p3-search.byteimg.com/obj/labis/06dc24c270ef40f96c8b574a38ad0f7d" alt="都江堰熊猫谷" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="text-xl font-semibold mb-2">都江堰中华大熊猫苑</h4>
+                    <p class="text-gray-600 mb-4">可以近距离观察大熊猫的日常生活，感受它们带来的温馨与愉悦。园区还有丰富的公众教育活动，让小朋友深入了解国宝的生长习性及保护知识。</p>
+                    <div class="flex flex-wrap mb-4">
+                        <div class="data-pill"><i class="fas fa-ticket-alt mr-1"></i> 成人票53元</div>
+                        <div class="data-pill"><i class="fas fa-bus mr-1"></i> 102路公交车</div>
+                        <div class="data-pill"><i class="fas fa-clock mr-1"></i> 建议游玩3-4小时</div>
+                    </div>
+                    <img src="https://p3-search.byteimg.com/obj/labis/1498dcfcc1cc624cee8dcf3a752a0372" alt="都江堰中华大熊猫苑" class="rounded-lg w-full max-w-md mx-auto">
+                </div>
+            </div>
+            
+            <!-- 第13-14天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第13-14天：休闲时光，自由活动</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600">这两天可以自由安排时间，去成都的大街小巷逛逛，品尝当地美食，购买一些特色纪念品。也可以再次前往之前喜欢的景点，重温美好时光。</p>
+                </div>
+            </div>
+            
+            <!-- 第15天 -->
+            <div class="schedule-day">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">第15天：返程</h3>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600">收拾行李，准备返程。根据预订的航班时间，提前前往机场办理登机手续。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 播客部分 -->
+    <section id="podcast" class="container mx-auto py-12 px-4 md:px-8">
+        <div class="glassmorphism p-8 mb-16">
+            <h2 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-podcast"></i>
+                </div>
+                成都之旅的奇妙邀约
+            </h2>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">开场白</h3>
+                <p class="text-gray-600 mb-4">亲爱的邹锦馨小朋友，你好呀！我是这期节目的主播。上期节目里看到了你的留言，真的特别开心呢！感觉你就像一颗充满好奇和活力的小太阳，对成都的旅行充满了期待。我和你一样，也特别盼着能和你一起分享这次超棒的成都之旅。今天呀，我就带着精心准备的成都景点攻略来啦，保证让你对这次旅行更加心动！</p>
+                
+                <div class="audio-player bg-indigo-50 p-4 rounded-lg">
+                    <audio controls class="w-full">
+                        <source src="your-podcast-file.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频元素。
+                    </audio>
+                    <p class="text-sm text-gray-600 mt-2 text-center">点击播放按钮收听成都亲子游播客</p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">景点介绍</h3>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">成都大熊猫繁育研究基地</h4>
+                    <p class="text-gray-600 mb-4">锦馨呀，你上期留言说特别喜欢大熊猫，那咱们这次成都之旅的第一站就一定要去成都大熊猫繁育研究基地啦！这里就像是大熊猫们的快乐家园，一只只圆滚滚的大熊猫就像毛茸茸的大团子，超级可爱！你可以近距离看到它们吃竹子、睡觉、玩耍的样子，感觉它们就像一个个调皮的小朋友。</p>
+                    <img src="https://p3-search.byteimg.com/obj/labis/845661d331d582ecbd9bb3e48d16eef4" alt="成都大熊猫繁育研究基地" class="rounded-lg w-full max-w-md mx-auto mb-4">
+                    <p class="text-gray-600">园区里还有科普展示区，就像一个知识小宝库，能让你学到好多关于大熊猫的小秘密，比如它们是怎么出生长大的，喜欢吃什么东西。从外婆家所在的七号线三瓦窑站出发，坐地铁6号线到西华大道站，D出口出来再走一小段路就能到啦，是不是很方便呀！这里成人票只要55元，学生票27元，像你这样可爱的小朋友说不定还能免费呢！建议咱们早点去，这样就能避开好多人，还能看到更活泼的大熊猫哟！而且夏天去的时候记得做好防晒和防暑措施，就像给你自己穿上一层保护衣。</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">金沙遗址博物馆</h4>
+                    <p class="text-gray-600 mb-4">接下来呀，我要重点给你介绍一下金沙遗址博物馆。这个地方可太神奇啦，就像是一扇通往古蜀文明的神秘大门。博物馆里有好多珍贵的文物，就像一个个会讲故事的小精灵。比如说神秘的金面具，它就像一个隐藏着无数秘密的神秘使者，在古代可能是古蜀人举行重要仪式的时候戴的呢。</p>
+                    <img src="http://pic5.40017.cn/03/000/43/79/rB5oQFzRSbCACd1wAAIeK0xyA4w466.jpg" alt="金沙遗址博物馆" class="rounded-lg w-full max-w-md mx-auto mb-4">
+                    <p class="text-gray-600">还有精美的玉器，每一件都像是能工巧匠用魔法雕刻出来的，特别漂亮。这里面的每一件文物都有着上千年的历史，就像一个个时光老人，能带你穿越回古代，看看古蜀人是怎么生活的。哥哥也特别想去这个地方呢，咱们一家人一起去探索古蜀文明，就像一场刺激的冒险之旅，一定会留下超级难忘的回忆。门票只要70元，建议游玩3 - 4小时，你可以通过手机地图软件查到从外婆家到这里的最佳路线，坐地铁或者打车都很方便。</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">成都欢乐谷</h4>
+                    <p class="text-gray-600 mb-4">锦馨，你不是喜欢刺激好玩的游乐园嘛，成都欢乐谷绝对是你的快乐天堂！这里有阳光港区、欢乐时光区、加勒比旋风区等九个主题区，就像九个不同的魔法世界。里面有好多好玩的游乐设施，就像一个个会变魔法的大玩具。</p>
+                    <img src="https://p3-search.byteimg.com/obj/labis/cd3949f51add2f8d6bd29c56a2fe13f4" alt="成都欢乐谷" class="rounded-lg w-full max-w-md mx-auto mb-4">
+                    <p class="text-gray-600">比如摩托过山车，就像一只超级快的钢铁巨龙，带着你在轨道上风驰电掣；还有跳楼机，一下子把你带到高高的空中，然后又快速下降，那种刺激的感觉就像坐火箭一样。当然啦，也有适合小朋友玩的游乐项目，像旋转木马，就像一个梦幻的童话世界，你坐在上面就像公主一样。从七号线三瓦窑站坐地铁6号线到西华大道站，D出口出来走一会儿就能到啦。全价票（成人）230元，儿童票120元，你可以和爸爸妈妈一起在这里尽情玩耍一整天。去之前最好提前了解一下园内热门项目的排队情况，这样就能合理安排游玩顺序，玩得更开心啦！</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">成都极地海洋公园</h4>
+                    <p class="text-gray-600 mb-4">还有成都极地海洋公园也很不错哟！这里就像一个神秘的海底世界，有企鹅馆、北极熊馆、鲸豚馆等好多动物场馆。走进企鹅馆，就像来到了寒冷的南极，一只只小企鹅摇摇摆摆地走路，就像一群可爱的小绅士。</p>
+                    <img src="https://p3-sdbk2-media.byteimg.com/tos-cn-i-xv4ileqgde/cce6ce0219ed42e5a3247b4da0e60d2d~tplv-xv4ileqgde-image.image" alt="成都极地海洋公园" class="rounded-lg w-full max-w-md mx-auto mb-4">
+                    <p class="text-gray-600">在鲸豚馆，你可以看到聪明的海豚和白鲸表演，它们就像会跳舞的小精灵，一会儿跃出水面，一会儿做出各种可爱的动作，超级精彩！还有鲨鱼馆，透过大大的玻璃，你能看到凶猛的鲨鱼在水里游来游去，感觉就像和它们面对面一样。从七号线三瓦窑站坐地铁1号线到"海昌路"站，A出口出来走一小段路就到啦。成人票260元，成人票（含深海探险体验馆）280元，儿童/学生/老人票（含深海探险体验馆）200元。去的时候提前查询一下表演时间，这样就能合理安排行程，不错过每一场精彩的表演。而且馆内温度比较低，记得带上一件小外套，就像给你自己加了一层温暖的小被子。</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">成都融创乐园</h4>
+                    <p class="text-gray-600 mb-4">成都融创乐园也值得一去哦！它是以蜀文化为主题的乐园，就像一个充满历史韵味的魔法城堡。这里有天府耍都、蜀汉风云、藏羌秘境等六大主题区，每个主题区都有自己独特的魅力。</p>
+                    <img src="https://p3-search.byteimg.com/obj/labis/e7cd2f8715ebd722570145b07d45029e" alt="成都融创乐园" class="rounded-lg w-full max-w-md mx-auto mb-4">
+                    <p class="text-gray-600">里面有天路历险、飞行影院、星际俱乐部等25台游乐设备，还有精彩的演艺和可爱的萌宠动物。你可以在这里体验到刺激的游乐项目，也能感受到浓浓的蜀文化氛围。从外婆家可以先坐茶店子班车到都江堰客运中心，再打个车大概10分钟就能到成都融创文旅城啦。成人欢乐套票198元，儿童/60 - 69岁老人欢乐套票120元，亲子1大1小欢乐套票298元。去之前提前了解一下园内活动安排，合理规划游玩路线，这样就能玩得更尽兴啦！</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-xl font-semibold mb-2 text-indigo-500">都江堰熊猫谷和都江堰中华大熊猫苑</h4>
+                    <p class="text-gray-600 mb-4">最后咱们来说说都江堰熊猫谷和都江堰中华大熊猫苑。都江堰熊猫谷就像一个大自然的宝藏之地，你可以看到半原生态野放过渡实验区的大熊猫，它们在这里自由自在地生活，就像在自己的大森林里一样。</p>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <img src="https://p3-search.byteimg.com/obj/labis/06dc24c270ef40f96c8b574a38ad0f7d" alt="熊猫谷" class="rounded-lg w-full md:w-1/2">
+                        <img src="https://p3-search.byteimg.com/obj/labis/1498dcfcc1cc624cee8dcf3a752a0372" alt="都江堰中华大熊猫苑" class="rounded-lg w-full md:w-1/2">
+                    </div>
+                    <p class="text-gray-600">还有小熊猫生态放养区，不过需要提前预约才能进去哦。在这里你能学到好多关于大熊猫和小熊猫的知识，就像上了一堂有趣的自然课。都江堰中华大熊猫苑也很棒，你可以近距离观察大熊猫的日常生活，感受它们带来的温馨与愉悦。园区里还有康复训练区，能看到大熊猫在专业人员的指导下进行康复训练，就像看到运动员在训练一样。这里还有一个熊猫文化展览馆，里面陈列着各种和大熊猫有关的文物、艺术品和科普资料，就像一个大熊猫的历史博物馆。从外婆家去这两个地方都有很方便的交通方式，你可以选择适合自己的。这两个地方的门票价格也很合理，能让你有一个超棒的游玩体验。</p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-2xl font-bold mb-4 text-indigo-600">结尾总结</h3>
+                <p class="text-gray-600">锦馨呀，这次的成都之旅就像一场充满惊喜的梦幻冒险。有可爱的大熊猫、刺激好玩的游乐园、神秘的古蜀文明博物馆，还有美丽的海洋世界。特别是金沙遗址博物馆，就像一个神秘的宝藏盒子，里面藏着好多古蜀文明的秘密。哥哥也很想去呢，咱们一家人一起去打开这个宝藏盒子，探索那些古老的故事，一定会特别有意思。我相信你一定会爱上这次旅行的，让我们一起期待这次美好的成都之旅吧！我都已经迫不及待地想和你一起出发啦！</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 py-8">
+        <div class="container mx-auto px-4 md:px-8 text-center">
+            <p class="text-gray-600 mb-2">created by <a href="https://space.bilibili.com/520787824" class="text-indigo-600 hover:text-indigo-800">狂奔白鹡鸰</a></p>
+            <p class="text-gray-500 text-sm">页面内容仅供参考</p>
+        </div>
+    </footer>
+
+    <script>
+        // 添加滚动动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+
+                    // 点击导航链接后关闭移动端菜单
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    if (mobileMenu.classList.contains('active')) {
+                        mobileMenu.classList.remove('active');
+                        // 同时切换图标回汉堡按钮
+                        const menuIcon = document.querySelector('#mobileMenuButton i');
+                        menuIcon.classList.remove('fa-times');
+                        menuIcon.classList.add('fa-bars');
+                    }
+                });
+            });
+
+            // 移动端导航菜单切换
+            const menuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            menuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+
+                // 切换图标
+                const icon = this.querySelector('i');
+                if (mobileMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // 点击页面其他区域关闭移动端菜单
+            document.addEventListener('click', function(event) {
+                const isClickInsideNav = document.getElementById('mainNav').contains(event.target);
+
+                if (!isClickInsideNav && mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    const icon = menuButton.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // 背景音乐
+            const bgMusic = new Audio('https://music.163.com/song/media/outer/url?id=436514312.mp3'); // 示例音乐《成都》
+            bgMusic.loop = true;
+            
+            // 可以添加一个按钮来控制背景音乐的播放/暂停
+            // 这里只是示例，实际可以根据需要添加UI控制
+            // bgMusic.play();
+        });
+    </script>
+</body>
+</html>
